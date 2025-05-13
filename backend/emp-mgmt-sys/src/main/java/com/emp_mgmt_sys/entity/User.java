@@ -16,7 +16,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     private String email;
 
     private String password;
@@ -68,4 +67,5 @@ public class User {
 
         return dto;
     }
+
 }

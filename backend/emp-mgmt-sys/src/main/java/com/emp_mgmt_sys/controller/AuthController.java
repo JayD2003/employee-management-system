@@ -1,29 +1,51 @@
 package com.emp_mgmt_sys.controller;
 
-import com.emp_mgmt_sys.service.AuthService;
+import com.emp_mgmt_sys.dto.AuthRequest;
+import com.emp_mgmt_sys.dto.AuthResponse;
 import com.emp_mgmt_sys.dto.UserDTO;
-import com.emp_mgmt_sys.entity.User;
+import com.emp_mgmt_sys.service.UserInfoService;
+import com.emp_mgmt_sys.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/auth")
-@CrossOrigin("*")
+@RequestMapping("/api/auth/")
 public class AuthController {
 
     @Autowired
-    private AuthService authService;
+    private UserInfoService service;
+
+    @Autowired
+    private JwtUtil jwtService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @GetMapping("/welcome")
+    public String welcome() {
+        return "Welcome this endpoint is not secure";
+    }
+
+    @PostMapping("/addNewUser")
+    public String addNewUser(@RequestBody UserDTO userInfo) {
+        return service.addUser(userInfo);
+    }
+
+    // Removed the role checks here as they are already managed in SecurityConfig
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO user){
-        UserDTO dbUser = authService.login(user);
-
-        if(dbUser == null){
-            return new ResponseEntity<>("Wrong credentials", HttpStatus.UNAUTHORIZED);
+    public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
+        );
+        if (authentication.isAuthenticated()) {
+            return new AuthResponse(jwtService.generateToken(authRequest.getEmail()));
+        } else {
+            throw new UsernameNotFoundException("Invalid user request!");
         }
-
-        return new ResponseEntity<>("Successfully logged in", HttpStatus.OK);
     }
 }
+
