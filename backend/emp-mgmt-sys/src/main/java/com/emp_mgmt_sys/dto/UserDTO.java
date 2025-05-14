@@ -16,6 +16,16 @@ public class UserDTO {
 
     private UserRole userRole;
 
+    private UserDTO Manager;
+
+    public UserDTO getManager() {
+        return Manager;
+    }
+
+    public void setManager(UserDTO manager) {
+        Manager = manager;
+    }
+
     public Long getId() {
         return id;
     }

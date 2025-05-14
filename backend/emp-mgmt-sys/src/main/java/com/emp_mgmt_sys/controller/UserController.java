@@ -1,5 +1,6 @@
 package com.emp_mgmt_sys.controller;
 
+import com.emp_mgmt_sys.dto.AssignEmployeeRequest;
 import com.emp_mgmt_sys.dto.UserDTO;
 import com.emp_mgmt_sys.service.UserInfoService;
 import com.emp_mgmt_sys.service.UserService;
@@ -26,10 +27,22 @@ public class UserController {
     }
 
     // Admin can view all users
-    @GetMapping("/all")
+    @GetMapping("/allUsers")
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserDTO> getAllUsers() {
         return userService.getAllUsers();
+    }
+
+    @GetMapping("/allManagers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserDTO>> getAllManagers() {
+        return ResponseEntity.ok(userService.getAllManagers());
+    }
+
+    @GetMapping("/allEmployees")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserDTO>> getAllEmployees() {
+        return ResponseEntity.ok(userService.getAllEmployees());
     }
 
     // Admin can view a specific user
@@ -39,12 +52,32 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('EMPLOYEE')")
+    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+        String response = userService.updateUser(id, userDTO);
+        return ResponseEntity.ok(response);
+    }
+
     // Admin can delete a user
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully");
+    }
+
+    @PostMapping("/assign-employees")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> assignEmployeesToManager(@RequestBody AssignEmployeeRequest assignEmployeeRequest) {
+        userService.assignEmployeesToManager(assignEmployeeRequest.getManagerId(), assignEmployeeRequest.getEmployeeIds());
+        return ResponseEntity.ok("Employees assigned to manager successfully");
+    }
+
+    @GetMapping("/assigned-employees/{managerId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public List<UserDTO> getAssignedEmployees(@PathVariable Long managerId) {
+        return userService.getAssignedEmployees(managerId);
     }
 }
 

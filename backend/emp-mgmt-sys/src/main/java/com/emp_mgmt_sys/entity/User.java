@@ -2,10 +2,7 @@ package com.emp_mgmt_sys.entity;
 
 import com.emp_mgmt_sys.dto.UserDTO;
 import com.emp_mgmt_sys.enums.UserRole;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -23,6 +20,18 @@ public class User {
     private String name;
 
     private UserRole userRole;
+
+    @ManyToOne(fetch = FetchType.LAZY)  // One manager can have many employees
+    @JoinColumn(name = "manager_id")
+    private User manager;
+
+    public User getManager() {
+        return manager;
+    }
+
+    public void setManager(User manager) {
+        this.manager = manager;
+    }
 
     public String getEmail() {
         return email;
@@ -63,6 +72,9 @@ public class User {
         dto.setName(this.name);
         dto.setEmail(this.email);
         dto.setPassword(this.password);
+        if (this.manager != null) {
+            dto.setManager(this.manager.getDTO());  // Including the manager's details
+        }
         dto.setUserRole(this.userRole);
 
         return dto;
