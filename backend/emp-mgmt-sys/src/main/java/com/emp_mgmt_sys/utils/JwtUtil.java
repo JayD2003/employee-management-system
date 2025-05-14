@@ -1,9 +1,13 @@
 package com.emp_mgmt_sys.utils;
 
+import com.emp_mgmt_sys.entity.User;
 import com.emp_mgmt_sys.enums.UserRole;
+import com.emp_mgmt_sys.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -14,6 +18,10 @@ public class JwtUtil {
 
     private SecretKey key;
 
+    @Autowired
+    private UserRepository userRepository;
+
+
     @PostConstruct
     public void init() {
         // 32+ chars for HS256
@@ -22,10 +30,11 @@ public class JwtUtil {
     }
 
     // Generate JWT token
-    public String generateToken(String email) {
+    public String generateToken(String email, String role) {
         long EXPIRATION = 1000 * 60 * 60 * 10L; // 10 hours
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role) // add role claim
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(key, SignatureAlgorithm.HS256)

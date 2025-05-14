@@ -3,6 +3,8 @@ package com.emp_mgmt_sys.controller;
 import com.emp_mgmt_sys.dto.AuthRequest;
 import com.emp_mgmt_sys.dto.AuthResponse;
 import com.emp_mgmt_sys.dto.UserDTO;
+import com.emp_mgmt_sys.entity.User;
+import com.emp_mgmt_sys.repository.UserRepository;
 import com.emp_mgmt_sys.service.UserInfoService;
 import com.emp_mgmt_sys.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping("/welcome")
     public String welcome() {
         return "Welcome this endpoint is not secure";
@@ -42,7 +47,9 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
         );
         if (authentication.isAuthenticated()) {
-            return new AuthResponse(jwtService.generateToken(authRequest.getEmail()));
+            User user = userRepository.findByEmail(authRequest.getEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            return new AuthResponse(jwtService.generateToken(authRequest.getEmail(), user.getUserRole().name()), user.getUserRole().name());
         } else {
             throw new UsernameNotFoundException("Invalid user request!");
         }
