@@ -3,7 +3,6 @@ package com.emp_mgmt_sys.controller;
 import com.emp_mgmt_sys.dto.AssignEmployeeRequest;
 import com.emp_mgmt_sys.dto.UserDTO;
 import com.emp_mgmt_sys.service.UserInfoService;
-import com.emp_mgmt_sys.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
