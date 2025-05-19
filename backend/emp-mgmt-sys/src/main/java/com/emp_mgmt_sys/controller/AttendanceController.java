@@ -4,6 +4,7 @@ package com.emp_mgmt_sys.controller;
 import com.emp_mgmt_sys.dto.AttendanceDTO;
 import com.emp_mgmt_sys.dto.AttendanceRequest;
 import com.emp_mgmt_sys.service.AttendanceService;
+import com.emp_mgmt_sys.utils.SecurityUtil;
 import com.emp_mgmt_sys.utils.UserInfoDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -45,11 +46,17 @@ public class AttendanceController {
         return attendanceService.getAttendanceHistory(userId);
     }
 
+    @GetMapping("/attendance-history/")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public List<AttendanceDTO> getAttendanceHistoryForCurrentUser() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        return attendanceService.getAttendanceHistory(userId);
+    }
+
     @GetMapping("/manager-history")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<AttendanceDTO>> getAttendanceHistoryForManager() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String managerEmail = (String) auth.getPrincipal();
+        String managerEmail = SecurityUtil.getCurrentUserEmail();
         List<AttendanceDTO> history = attendanceService.getAttendanceHistoryForManager(managerEmail);
         return ResponseEntity.ok(history);
     }

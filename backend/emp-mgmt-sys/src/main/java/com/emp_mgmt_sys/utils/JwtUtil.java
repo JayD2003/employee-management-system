@@ -30,11 +30,12 @@ public class JwtUtil {
     }
 
     // Generate JWT token
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, String role, Long userId) {
         long EXPIRATION = 1000 * 60 * 60 * 10L; // 10 hours
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role) // add role claim
+                .claim("userId", userId) // <-- Add userId here
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -50,6 +51,12 @@ public class JwtUtil {
     public UserRole extractRole(String token) {
         String roleStr = extractAllClaims(token).get("role", String.class);
         return UserRole.valueOf(roleStr);
+    }
+
+    // Extract userId from token
+    public Long extractUserId(String token) {
+        Long userId = extractAllClaims(token).get("userId", Long.class);
+        return userId;
     }
 
     // Validate token (signature + expiration)

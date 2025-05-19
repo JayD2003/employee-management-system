@@ -3,6 +3,7 @@ package com.emp_mgmt_sys.controller;
 import com.emp_mgmt_sys.dto.AssignEmployeeRequest;
 import com.emp_mgmt_sys.dto.UserDTO;
 import com.emp_mgmt_sys.service.UserInfoService;
+import com.emp_mgmt_sys.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,14 +46,15 @@ public class UserController {
     }
 
     // Admin can view a specific user
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserDTO getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    @GetMapping("/getCurrentUser")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('EMPLOYEE')")
+    public UserDTO getUserById() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        return userService.getUserById(userId);
     }
 
     @PutMapping("/update/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
         String response = userService.updateUser(id, userDTO);
         return ResponseEntity.ok(response);
@@ -76,6 +78,13 @@ public class UserController {
     @GetMapping("/assigned-employees/{managerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public List<UserDTO> getAssignedEmployees(@PathVariable Long managerId) {
+        return userService.getAssignedEmployees(managerId);
+    }
+
+    @GetMapping("/assigned-employees/")
+    @PreAuthorize("hasRole('MANAGER')")
+    public List<UserDTO> getAssignedEmployeesForManager() {
+        Long managerId = SecurityUtil.getCurrentUserId();
         return userService.getAssignedEmployees(managerId);
     }
 }

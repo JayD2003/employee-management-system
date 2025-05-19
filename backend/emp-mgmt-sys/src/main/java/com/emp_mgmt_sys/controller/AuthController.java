@@ -49,7 +49,7 @@ public class AuthController {
         if (authentication.isAuthenticated()) {
             User user = userRepository.findByEmail(authRequest.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            return new AuthResponse(jwtService.generateToken(authRequest.getEmail(), user.getUserRole().name()), user.getUserRole().name());
+            return new AuthResponse(jwtService.generateToken(authRequest.getEmail(), user.getUserRole().name(), user.getId()), user.getUserRole().name());
         } else {
             throw new UsernameNotFoundException("Invalid user request!");
         }

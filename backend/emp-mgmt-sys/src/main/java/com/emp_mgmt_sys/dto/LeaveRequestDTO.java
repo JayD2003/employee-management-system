@@ -1,8 +1,7 @@
 package com.emp_mgmt_sys.dto;
 
-import com.emp_mgmt_sys.entity.User;
-import com.emp_mgmt_sys.enums.LeaveStatus;
 import com.emp_mgmt_sys.enums.LeaveType;
+import com.emp_mgmt_sys.enums.Status;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,7 +19,7 @@ public class LeaveRequestDTO {
 
     private String reason;
 
-    private LeaveStatus status = LeaveStatus.PENDING; // enum: PENDING, APPROVED, REJECTED
+    private Status status = Status.PENDING; // enum: PENDING, APPROVED, REJECTED
 
     private LocalDateTime requestDate = LocalDateTime.now();
 
@@ -72,11 +71,11 @@ public class LeaveRequestDTO {
         this.reason = reason;
     }
 
-    public LeaveStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(LeaveStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

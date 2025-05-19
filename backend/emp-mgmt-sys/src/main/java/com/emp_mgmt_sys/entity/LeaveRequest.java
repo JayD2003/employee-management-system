@@ -1,7 +1,7 @@
 package com.emp_mgmt_sys.entity;
 
 import com.emp_mgmt_sys.dto.LeaveRequestDTO;
-import com.emp_mgmt_sys.enums.LeaveStatus;
+import com.emp_mgmt_sys.enums.Status;
 import com.emp_mgmt_sys.enums.LeaveType;
 import jakarta.persistence.*;
 
@@ -27,7 +27,7 @@ public class LeaveRequest {
 
     private String reason;
 
-    private LeaveStatus status; // enum: PENDING, APPROVED, REJECTED
+    private Status status; // enum: PENDING, APPROVED, REJECTED
 
     private LocalDateTime requestDate;
 
@@ -73,11 +73,11 @@ public class LeaveRequest {
         this.reason = reason;
     }
 
-    public LeaveStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(LeaveStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

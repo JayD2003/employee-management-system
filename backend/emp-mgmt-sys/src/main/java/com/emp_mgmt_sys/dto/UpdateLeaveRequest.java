@@ -1,11 +1,11 @@
 package com.emp_mgmt_sys.dto;
 
-import com.emp_mgmt_sys.enums.LeaveStatus;
+import com.emp_mgmt_sys.enums.Status;
 
 public class UpdateLeaveRequest {
     private Long managerId;
     private Long leaveRequestId;
-    private LeaveStatus status; // APPROVED or REJECTED
+    private Status status; // APPROVED or REJECTED
 
     public Long getManagerId() {
         return managerId;
@@ -23,11 +23,11 @@ public class UpdateLeaveRequest {
         this.leaveRequestId = leaveRequestId;
     }
 
-    public LeaveStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(LeaveStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 }

@@ -5,6 +5,7 @@ import com.emp_mgmt_sys.dto.LeaveBalanceDTO;
 import com.emp_mgmt_sys.dto.LeaveRequestDTO;
 import com.emp_mgmt_sys.dto.UpdateLeaveRequest;
 import com.emp_mgmt_sys.service.LeaveService;
+import com.emp_mgmt_sys.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,8 +37,9 @@ public class LeaveController {
     }
 
     @PreAuthorize("hasRole('EMPLOYEE')")
-    @GetMapping("/balance/{userId}")
-    public ResponseEntity<LeaveBalanceDTO> getLeaveBalance(@PathVariable Long userId) {
+    @GetMapping("/balance/")
+    public ResponseEntity<LeaveBalanceDTO> getLeaveBalance() {
+        Long userId = SecurityUtil.getCurrentUserId();
         LeaveBalanceDTO balance = leaveService.getLeaveBalance(userId);
         return ResponseEntity.ok(balance);
     }
@@ -45,8 +47,7 @@ public class LeaveController {
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/manager/{status}")
     public ResponseEntity<List<LeaveRequestDTO>> getLeavesForManagerByStatus(@PathVariable String status) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String managerEmail = (String) auth.getPrincipal();
+        String managerEmail = SecurityUtil.getCurrentUserEmail();
         List<LeaveRequestDTO> leaveRequests = leaveService.getLeaveRequestsForManagerOnLeaveStatus(managerEmail, status);
         return ResponseEntity.ok(leaveRequests);
     }
@@ -61,8 +62,7 @@ public class LeaveController {
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/manager/history")
     public ResponseEntity<List<LeaveRequestDTO>> getLeaveHistoryForManager() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String managerEmail = (String) auth.getPrincipal();
+        String managerEmail = SecurityUtil.getCurrentUserEmail();
         List<LeaveRequestDTO> leaveRequests = leaveService.getLeaveRequestHistoryForManager(managerEmail);
         return ResponseEntity.ok(leaveRequests);
     }
@@ -70,8 +70,7 @@ public class LeaveController {
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/manager/balances")
     public ResponseEntity<List<LeaveBalanceDTO>> getLeaveBalancesForManager() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String managerEmail = (String) auth.getPrincipal();
+        String managerEmail = SecurityUtil.getCurrentUserEmail();
         List<LeaveBalanceDTO> balances = leaveService.getLeaveBalancesForManager(managerEmail);
         return ResponseEntity.ok(balances);
     }

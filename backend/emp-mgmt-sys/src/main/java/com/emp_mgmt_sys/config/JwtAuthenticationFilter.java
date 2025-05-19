@@ -1,6 +1,7 @@
 package com.emp_mgmt_sys.config;
 
 import com.emp_mgmt_sys.enums.UserRole;
+import com.emp_mgmt_sys.utils.CustomUserPrincipal;
 import com.emp_mgmt_sys.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,12 +35,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null && jwtUtil.validateToken(token)) { // Validate the token
             String email = jwtUtil.extractEmail(token); // Extract the username (email) from the token
             UserRole role = jwtUtil.extractRole(token); // Extract user roles or authorities from token
+            Long userId = jwtUtil.extractUserId(token);
 
             // Create the authentication token (no need for password or user details)
             var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
 
+            CustomUserPrincipal customUserPrincipal = new CustomUserPrincipal(userId, email);
+
             var authentication = new UsernamePasswordAuthenticationToken(
-                    email,  // this becomes the 'principal'
+                    customUserPrincipal,  // this becomes the 'principal'
                     null,   // credentials (we don't need them after login)
                     authorities
             );

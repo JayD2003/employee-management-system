@@ -5,7 +5,7 @@ import com.emp_mgmt_sys.entity.Attendance;
 import com.emp_mgmt_sys.entity.LeaveBalance;
 import com.emp_mgmt_sys.entity.LeaveRequest;
 import com.emp_mgmt_sys.entity.User;
-import com.emp_mgmt_sys.enums.LeaveStatus;
+import com.emp_mgmt_sys.enums.Status;
 import com.emp_mgmt_sys.enums.UserRole;
 import com.emp_mgmt_sys.exception.UserNotFoundException;
 import com.emp_mgmt_sys.repository.LeaveBalanceRepository;
@@ -45,17 +45,17 @@ public class LeaveService {
 
         switch (leave.getLeaveType()) {
             case PAID:
-                if (balance.getPaidLeaveBalance() <= daysRequested) {
+                if (balance.getPaidLeaveBalance() < daysRequested) {
                     throw new RuntimeException("Insufficient paid leave balance");
                 }
                 break;
             case SICK:
-                if (balance.getSickLeaveBalance() <= daysRequested) {
+                if (balance.getSickLeaveBalance() < daysRequested) {
                     throw new RuntimeException("Insufficient sick leave balance");
                 }
                 break;
             case UNPAID:
-                if (balance.getUnpaidLeaveBalance() <= daysRequested) {
+                if (balance.getUnpaidLeaveBalance() < daysRequested) {
                     throw new RuntimeException("Insufficient sick leave balance");
                 }
                 break;
@@ -68,7 +68,7 @@ public class LeaveService {
         leaveRequest.setStartDate(leave.getStartDate());
         leaveRequest.setEndDate(leave.getEndDate());
         leaveRequest.setReason(leave.getReason());
-        leaveRequest.setStatus(LeaveStatus.PENDING);
+        leaveRequest.setStatus(Status.PENDING);
         leaveRequest.setRequestDate(LocalDateTime.now());
 
         leaveRequestRepository.save(leaveRequest);
@@ -81,13 +81,13 @@ public class LeaveService {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(dto.getLeaveRequestId())
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
 
-        if (leaveRequest.getStatus() != LeaveStatus.PENDING) {
+        if (leaveRequest.getStatus() != Status.PENDING) {
             throw new RuntimeException("Only pending requests can be updated");
         }
 
         leaveRequest.setStatus(dto.getStatus());
 
-        if (dto.getStatus() == LeaveStatus.APPROVED) {
+        if (dto.getStatus() == Status.APPROVED) {
             LeaveBalance balance = leaveBalanceRepository.findByUserId(leaveRequest.getUser().getId())
                     .orElseThrow(() -> new RuntimeException("Leave balance not found"));
 
@@ -95,17 +95,17 @@ public class LeaveService {
 
             switch (leaveRequest.getLeaveType()) {
                 case PAID:
-                    if (balance.getPaidLeaveBalance() <= days)
+                    if (balance.getPaidLeaveBalance() < days)
                         throw new RuntimeException("Insufficient paid leave balance");
                     balance.setPaidLeaveBalance((int) (balance.getPaidLeaveBalance() - days));
                     break;
                 case SICK:
-                    if (balance.getSickLeaveBalance() <= days)
+                    if (balance.getSickLeaveBalance() < days)
                         throw new RuntimeException("Insufficient sick leave balance");
                     balance.setSickLeaveBalance((int) (balance.getSickLeaveBalance() - days));
                     break;
                 case UNPAID:
-                    if (balance.getUnpaidLeaveBalance() <= days)
+                    if (balance.getUnpaidLeaveBalance() < days)
                         throw new RuntimeException("Insufficient sick leave balance");
                     balance.setUnpaidLeaveBalance((int) (balance.getUnpaidLeaveBalance() - days));
                     break;
@@ -123,10 +123,10 @@ public class LeaveService {
     }
 
     public List<LeaveRequestDTO> getLeaveRequestsForManagerOnLeaveStatus(String managerEmail, String status) {
-        LeaveStatus leaveStatus;
+        Status leaveStatus;
 
         try {
-            leaveStatus = LeaveStatus.valueOf(status.toUpperCase());
+            leaveStatus = Status.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid leave status: " + status);
         }
@@ -191,6 +191,7 @@ public class LeaveService {
             throw new UserNotFoundException("LeaveBalance not found with id" + userId);
         }
     }
+
 
     public List<LeaveBalanceDTO> getLeaveBalancesForManager(String managerEmail) {
         User manager = userRepository.findByEmail(managerEmail)
