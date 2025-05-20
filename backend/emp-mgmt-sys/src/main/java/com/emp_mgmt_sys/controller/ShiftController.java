@@ -1,15 +1,17 @@
 package com.emp_mgmt_sys.controller;
 
-import com.emp_mgmt_sys.dto.*;
-import com.emp_mgmt_sys.enums.Status;
-import com.emp_mgmt_sys.service.ShiftService;
+import com.emp_mgmt_sys.dto.requestDTO.CreateShiftSwapRequest;
+import com.emp_mgmt_sys.dto.requestDTO.ShiftAssignmentRequest;
+import com.emp_mgmt_sys.dto.responseDTO.ShiftSwapResponseDTO;
+import com.emp_mgmt_sys.dto.requestDTO.UpdateShiftSwapRequest;
+import com.emp_mgmt_sys.dto.responseDTO.ShiftResponseDTO;
+import com.emp_mgmt_sys.service.Impl.ShiftServiceImpl;
 import com.emp_mgmt_sys.utils.SecurityUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -20,105 +22,109 @@ import java.util.List;
 public class ShiftController {
 
     @Autowired
-    private ShiftService shiftService;
+    private ShiftServiceImpl shiftServiceImpl;
 
-    // Assign shift for a single day - Only ADMIN or MANAGER
+    // Assign shift for a single day - Only MANAGER
     @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/assign")
-    public ResponseEntity<String> assignShift(@RequestBody ShiftAssignmentRequest request) {
-        shiftService.assignShift(request);
+    public ResponseEntity<String> assignShift(@Valid @RequestBody ShiftAssignmentRequest request) {
+        shiftServiceImpl.assignShift(request);
         return ResponseEntity.ok("Shift assigned successfully");
     }
 
-    // Assign shifts for a whole week (Monday to Friday) - Only ADMIN or MANAGER
+    // Assign shifts for a whole week (Monday to Friday) - Only MANAGER
     @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/assign/week")
-    public ResponseEntity<String> assignWeeklyShifts(@RequestBody ShiftAssignmentRequest request) {
-        shiftService.assignWeeklyShifts(request);
+    public ResponseEntity<String> assignWeeklyShifts(@Valid @RequestBody ShiftAssignmentRequest request) {
+        shiftServiceImpl.assignWeeklyShifts(request);
         return ResponseEntity.ok("Weekly shifts assigned successfully");
     }
 
-    // Get employee shifts for current or next week based on reference date - ADMIN, MANAGER, EMPLOYEE (only self)
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('EMPLOYEE')")
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ShiftDTO>> getEmployeeShifts(
-            @PathVariable Long userId,
+    // Get current user's shifts based on reference date - All roles get own data
+    @PreAuthorize("hasAnyRole('EMPLOYEE')")
+    @GetMapping("/user/shifts")
+    public ResponseEntity<List<ShiftResponseDTO>> getMyShifts(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate referenceDate) {
-        List<ShiftDTO> shifts = shiftService.getEmployeeShifts(userId, referenceDate);
+        Long userId = SecurityUtil.getCurrentUserId();
+        List<ShiftResponseDTO> shifts = shiftServiceImpl.getEmployeeShifts(userId, referenceDate);
         return ResponseEntity.ok(shifts);
     }
 
-    // Get employee shift on a specific date - ADMIN, MANAGER, EMPLOYEE (only self)
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('EMPLOYEE')")
-    @GetMapping("/user/date")
-    public ResponseEntity<ShiftDTO> getEmployeeShiftByDate(
+    // Get current user's shift by date
+    @PreAuthorize("hasAnyRole('EMPLOYEE')")
+    @GetMapping("/user/shift")
+    public ResponseEntity<ShiftResponseDTO> getMyShiftByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         Long userId = SecurityUtil.getCurrentUserId();
-        ShiftDTO shift = shiftService.getEmployeeShiftByDate(userId, date);
+        ShiftResponseDTO shift = shiftServiceImpl.getEmployeeShiftByDate(userId, date);
         if (shift == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(shift);
     }
 
-    // Get swap balance for a user - ADMIN, MANAGER, EMPLOYEE (only self)
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('EMPLOYEE')")
-    @GetMapping("/user/swap-balance/{userId}")
-    public ResponseEntity<Integer> getSwapBalance(@PathVariable Long userId) {
-        int balance = shiftService.getSwapBalance(userId);
+    // Get current user's swap balance
+    @PreAuthorize("hasAnyRole('EMPLOYEE')")
+    @GetMapping("/user/swap-balance")
+    public ResponseEntity<Integer> getMySwapBalance() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        int balance = shiftServiceImpl.getSwapBalance(userId);
         return ResponseEntity.ok(balance);
     }
 
     // Get shifts for all employees under a manager on a specific date - Only MANAGER
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/manager/date")
-    public ResponseEntity<List<ShiftDTO>> getShiftsByDateForManager(
+    public ResponseEntity<List<ShiftResponseDTO>> getShiftsByDateForManager(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         Long managerId = SecurityUtil.getCurrentUserId();
-        List<ShiftDTO> shifts = shiftService.getShiftsByDateForManager(managerId, date);
+        List<ShiftResponseDTO> shifts = shiftServiceImpl.getShiftsByDateForManager(managerId, date);
         return ResponseEntity.ok(shifts);
     }
 
     // Create a shift swap request - Only EMPLOYEE
     @PreAuthorize("hasRole('EMPLOYEE')")
     @PostMapping("/swap-request")
-    public ResponseEntity<String> createSwapRequest(@RequestBody CreateShiftSwapRequest request) {
-        shiftService.createSwapRequest(request);
+    public ResponseEntity<String> createSwapRequest(@Valid @RequestBody CreateShiftSwapRequest request) {
+        // Always set current user ID here
+        request.setUserId(SecurityUtil.getCurrentUserId());
+        shiftServiceImpl.createSwapRequest(request);
         return ResponseEntity.ok("Shift swap request created");
     }
 
-    // Update swap request status (approve/reject) - Only MANAGER or ADMIN
+    // Update swap request status (approve/reject) - Only MANAGER
     @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/swap-request/status")
-    public ResponseEntity<String> updateSwapRequestStatus(@RequestBody UpdateShiftSwapRequest request) {
-        shiftService.updateSwapRequestStatus(request);
+    public ResponseEntity<String> updateSwapRequestStatus(@Valid @RequestBody UpdateShiftSwapRequest request) {
+        shiftServiceImpl.updateSwapRequestStatus(request);
         return ResponseEntity.ok("Shift swap request status updated");
     }
 
-    // Get swap requests of a user - ADMIN, MANAGER, EMPLOYEE (only self)
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('EMPLOYEE')")
-    @GetMapping("/swap-request/user/{userId}")
-    public ResponseEntity<List<ShiftSwapRequestDTO>> getSwapRequestsByUser(@PathVariable Long userId) {
-        List<ShiftSwapRequestDTO> requests = shiftService.getSwapRequestsByUser(userId);
+    // Get current user's swap requests
+    @PreAuthorize("hasAnyRole('EMPLOYEE')")
+    @GetMapping("/swap-request/user")
+    public ResponseEntity<List<ShiftSwapResponseDTO>> getMySwapRequests() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        List<ShiftSwapResponseDTO> requests = shiftServiceImpl.getSwapRequestsByUser(userId);
         return ResponseEntity.ok(requests);
     }
 
-    // Get swap requests for a manager by status (e.g. PENDING, APPROVED, REJECTED) - Only MANAGER
+    // Get swap requests for a manager by status - Only MANAGER
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/swap-request/manager/{status}")
-    public ResponseEntity<List<ShiftSwapRequestDTO>> getShiftSwapRequestsForManagerOnStatus(
+    public ResponseEntity<List<ShiftSwapResponseDTO>> getShiftSwapRequestsForManagerOnStatus(
             @PathVariable String status) {
         String managerEmail = SecurityUtil.getCurrentUserEmail();
-        List<ShiftSwapRequestDTO> requests = shiftService.getShiftSwapRequestsForManagerOnStatus(managerEmail, status);
+        List<ShiftSwapResponseDTO> requests = shiftServiceImpl.getShiftSwapRequestsForManagerOnStatus(managerEmail, status);
         return ResponseEntity.ok(requests);
     }
 
     // Get all pending swap requests for manager - Only MANAGER
     @PreAuthorize("hasRole('MANAGER')")
-    @GetMapping("/swap-request/manager/")
-    public ResponseEntity<List<ShiftSwapRequestDTO>> getSwapRequestsForManager() {
+    @GetMapping("/swap-request/manager")
+    public ResponseEntity<List<ShiftSwapResponseDTO>> getSwapRequestsForManager() {
         Long managerId = SecurityUtil.getCurrentUserId();
-        List<ShiftSwapRequestDTO> requests = shiftService.getSwapRequestsForManager(managerId);
+        List<ShiftSwapResponseDTO> requests = shiftServiceImpl.getSwapRequestsForManager(managerId);
         return ResponseEntity.ok(requests);
     }
 }

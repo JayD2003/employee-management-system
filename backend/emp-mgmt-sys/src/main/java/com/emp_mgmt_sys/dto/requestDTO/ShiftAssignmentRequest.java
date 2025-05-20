@@ -1,13 +1,19 @@
-package com.emp_mgmt_sys.dto;
+package com.emp_mgmt_sys.dto.requestDTO;
 
 import com.emp_mgmt_sys.enums.ShiftType;
-import org.springframework.cglib.core.Local;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
 public class ShiftAssignmentRequest {
+
+    @NotNull(message = "User ID cannot be null")
     private Long userId;
+
+    @NotNull(message = "Date cannot be null")
     private LocalDate date;
+
+    @NotNull(message = "Shift type cannot be null")
     private ShiftType shiftType;
 
     public Long getUserId() {

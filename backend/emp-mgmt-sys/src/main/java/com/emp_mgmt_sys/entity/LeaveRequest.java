@@ -1,9 +1,11 @@
 package com.emp_mgmt_sys.entity;
 
-import com.emp_mgmt_sys.dto.LeaveRequestDTO;
+import com.emp_mgmt_sys.dto.responseDTO.LeaveRequestResponseDTO;
 import com.emp_mgmt_sys.enums.Status;
 import com.emp_mgmt_sys.enums.LeaveType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,24 +13,36 @@ import java.time.LocalDateTime;
 @Entity
 public class LeaveRequest {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // assuming User entity represents employees
+    private User user;
 
-    private LeaveType leaveType; // enum for leave types
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LeaveType leaveType;
 
+    @Column(nullable = false)
+    @FutureOrPresent(message = "Start date cannot be in the past")
     private LocalDate startDate;
 
+    @Column(nullable = false)
+    @FutureOrPresent(message = "End date cannot be in the past")
     private LocalDate endDate;
 
+    @Column(nullable = false)
+    @Size(max = 500, message = "Reason must be at least 5 characters")
     private String reason;
 
-    private Status status; // enum: PENDING, APPROVED, REJECTED
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
 
+    @Column(nullable = false)
     private LocalDateTime requestDate;
 
     // getters and setters
@@ -89,8 +103,8 @@ public class LeaveRequest {
         this.requestDate = requestDate;
     }
 
-    public LeaveRequestDTO getDTO(){
-        LeaveRequestDTO requestDTO = new LeaveRequestDTO();
+    public LeaveRequestResponseDTO getDTO(){
+        LeaveRequestResponseDTO requestDTO = new LeaveRequestResponseDTO();
 
         requestDTO.setId(id);
         requestDTO.setUserId(user.getId());

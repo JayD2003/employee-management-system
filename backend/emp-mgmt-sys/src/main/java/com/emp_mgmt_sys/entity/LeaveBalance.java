@@ -1,7 +1,8 @@
 package com.emp_mgmt_sys.entity;
 
-import com.emp_mgmt_sys.dto.LeaveBalanceDTO;
+import com.emp_mgmt_sys.dto.responseDTO.LeaveBalanceResponseDTO;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 
 @Entity
 public class LeaveBalance {
@@ -14,10 +15,16 @@ public class LeaveBalance {
     @JoinColumn(name = "employee_id", nullable = false, unique = true)
     private User user;
 
+    @Column(nullable = false)
+    @Min(value = 0, message = "Sick leave balance must be non-negative")
     private Integer sickLeaveBalance = 10;
 
+    @Column(nullable = false)
+    @Min(value = 0, message = "Paid leave balance must be non-negative")
     private Integer paidLeaveBalance = 20;
 
+    @Column(nullable = false)
+    @Min(value = 0, message = "Unpaid leave balance must be non-negative")
     private Integer unpaidLeaveBalance = 20;
 
     // getters and setters
@@ -54,15 +61,15 @@ public class LeaveBalance {
         this.unpaidLeaveBalance = unpaidLeaveBalance;
     }
 
-    public LeaveBalanceDTO getDTO(){
-        LeaveBalanceDTO leaveBalanceDTO = new LeaveBalanceDTO();
+    public LeaveBalanceResponseDTO getDTO(){
+        LeaveBalanceResponseDTO leaveBalanceResponseDTO = new LeaveBalanceResponseDTO();
 
-        leaveBalanceDTO.setUserId(user.getId());
-        leaveBalanceDTO.setSickLeaveBalance(sickLeaveBalance);
-        leaveBalanceDTO.setPaidLeaveBalance(paidLeaveBalance);
-        leaveBalanceDTO.setUnpaidLeaveBalance(unpaidLeaveBalance);
+        leaveBalanceResponseDTO.setUserId(user.getId());
+        leaveBalanceResponseDTO.setSickLeaveBalance(sickLeaveBalance);
+        leaveBalanceResponseDTO.setPaidLeaveBalance(paidLeaveBalance);
+        leaveBalanceResponseDTO.setUnpaidLeaveBalance(unpaidLeaveBalance);
 
-        return leaveBalanceDTO;
+        return leaveBalanceResponseDTO;
     }
 }
 

@@ -1,15 +1,13 @@
-package com.emp_mgmt_sys.dto;
+package com.emp_mgmt_sys.dto.responseDTO;
 
-import com.emp_mgmt_sys.entity.Shift;
-import com.emp_mgmt_sys.entity.User;
 import com.emp_mgmt_sys.enums.ShiftType;
 import com.emp_mgmt_sys.enums.Status;
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class ShiftSwapRequestDTO {
+public class ShiftSwapResponseDTO {
     private Long id;
 
     private Long shiftId;
@@ -20,7 +18,7 @@ public class ShiftSwapRequestDTO {
 
     private ShiftType shiftType;
 
-    private Status status; // PENDING, APPROVED, REJECTED
+    private Status status; // PENDING, APPROVED, REJECTED // PENDING, APPROVED, REJECTED
 
     private LocalDateTime createdDate;
 

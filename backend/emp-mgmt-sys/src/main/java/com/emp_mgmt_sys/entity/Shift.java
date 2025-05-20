@@ -1,9 +1,7 @@
 package com.emp_mgmt_sys.entity;
 
-import com.emp_mgmt_sys.dto.ShiftDTO;
-import com.emp_mgmt_sys.enums.LeaveType;
+import com.emp_mgmt_sys.dto.responseDTO.ShiftResponseDTO;
 import com.emp_mgmt_sys.enums.ShiftType;
-import com.emp_mgmt_sys.enums.Status;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -17,10 +15,13 @@ public class Shift {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // assuming User entity represents employees
+    private User user;
 
-    private LocalDate shiftDate; // enum for leave types
+    @Column(nullable = false)
+    private LocalDate shiftDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ShiftType shiftType;
 
     private LocalDateTime createdDate;
@@ -57,8 +58,8 @@ public class Shift {
         this.createdDate = createdDate;
     }
 
-    public ShiftDTO getDto(){
-        ShiftDTO dto = new ShiftDTO();
+    public ShiftResponseDTO getDto(){
+        ShiftResponseDTO dto = new ShiftResponseDTO();
 
         dto.setId(id);
         dto.setUserId(user.getId());

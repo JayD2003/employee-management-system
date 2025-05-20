@@ -3,17 +3,25 @@ package com.emp_mgmt_sys.entity;
 import jakarta.persistence.*;
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "year", "month"})
+})
 public class ShiftBalance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
+    @Column(nullable = false)
     private int year;
+
+    @Column(nullable = false)
     private int month;
+
+    @Column(nullable = false)
     private int swapCount;
 
     public User getUser() {

@@ -1,11 +1,11 @@
-package com.emp_mgmt_sys.dto;
+package com.emp_mgmt_sys.dto.responseDTO;
 
 import com.emp_mgmt_sys.enums.AttendanceStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class AttendanceDTO {
+public class AttendanceResponseDTO {
 
     private Long userId;
     private LocalDate date;

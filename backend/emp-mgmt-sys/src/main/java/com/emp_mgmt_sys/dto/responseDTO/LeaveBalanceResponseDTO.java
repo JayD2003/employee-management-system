@@ -1,8 +1,6 @@
-package com.emp_mgmt_sys.dto;
+package com.emp_mgmt_sys.dto.responseDTO;
 
-import com.emp_mgmt_sys.entity.User;
-
-public class LeaveBalanceDTO {
+public class LeaveBalanceResponseDTO {
     private Long userId;
 
     private Integer sickLeaveBalance;

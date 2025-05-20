@@ -1,29 +1,34 @@
 package com.emp_mgmt_sys.entity;
 
-import com.emp_mgmt_sys.dto.UserDTO;
+import com.emp_mgmt_sys.dto.responseDTO.UserResponseDTO;
 import com.emp_mgmt_sys.enums.UserRole;
 import jakarta.persistence.*;
-import lombok.Data;
 
 @Entity
-@Data
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true) // ✅ Enforces unique and non-null email at DB level
     private String email;
 
+    @Column(nullable = false) // ✅ Password should not be null
     private String password;
 
+    @Column(nullable = false) // ✅ Name should not be null
     private String name;
 
+    @Enumerated(EnumType.STRING) // ✅ Store enum value as string (e.g., MANAGER)
+    @Column(nullable = false)
     private UserRole userRole;
 
-    @ManyToOne(fetch = FetchType.LAZY)  // One manager can have many employees
+    @ManyToOne(fetch = FetchType.LAZY) // ✅ Avoids unnecessary loading of manager details
     @JoinColumn(name = "manager_id")
     private User manager;
+
+    // ------------------ Getters & Setters ------------------
 
     public Long getId() {
         return id;
@@ -31,14 +36,6 @@ public class User {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public User getManager() {
-        return manager;
-    }
-
-    public void setManager(User manager) {
-        this.manager = manager;
     }
 
     public String getEmail() {
@@ -73,17 +70,32 @@ public class User {
         this.userRole = userRole;
     }
 
-    public UserDTO getDTO(){
-        UserDTO dto = new UserDTO();
+    public User getManager() {
+        return manager;
+    }
 
-        dto.setId(this.id);
-        dto.setName(this.name);
-        dto.setEmail(this.email);
-        dto.setPassword(this.password);
-        if (this.manager != null) {
-            dto.setManager(this.manager.getDTO());  // Including the manager's details
+    public void setManager(User manager) {
+        this.manager = manager;
+    }
+
+    // ------------------ Convert Entity to DTO ------------------
+
+    public UserResponseDTO getDTO() {
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setId(this.getId());
+        dto.setName(this.getName());
+        dto.setEmail(this.getEmail());
+        dto.setUserRole(this.getUserRole());
+
+        if (this.getManager() != null) {
+            UserResponseDTO.ManagerInfo managerInfo = new UserResponseDTO.ManagerInfo();
+            managerInfo.setId(this.getManager().getId());
+            managerInfo.setName(this.getManager().getName());
+            managerInfo.setEmail(this.getManager().getEmail());
+            dto.setManager(managerInfo);
+        } else {
+            dto.setManager(null);
         }
-        dto.setUserRole(this.userRole);
 
         return dto;
     }

@@ -1,6 +1,5 @@
-package com.emp_mgmt_sys.dto;
+package com.emp_mgmt_sys.dto.responseDTO;
 
-import com.emp_mgmt_sys.enums.UserRole;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.emp_mgmt_sys.dto;
+package com.emp_mgmt_sys.dto.requestDTO;
 
 import lombok.Data;
 import lombok.Getter;

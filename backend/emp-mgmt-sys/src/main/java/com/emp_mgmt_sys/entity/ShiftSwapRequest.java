@@ -1,6 +1,6 @@
 package com.emp_mgmt_sys.entity;
 
-import com.emp_mgmt_sys.dto.ShiftSwapRequestDTO;
+import com.emp_mgmt_sys.dto.responseDTO.ShiftSwapResponseDTO;
 import com.emp_mgmt_sys.enums.ShiftType;
 import com.emp_mgmt_sys.enums.Status;
 import jakarta.persistence.*;
@@ -14,7 +14,7 @@ public class ShiftSwapRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)  // changed from OneToOne to ManyToOne
     @JoinColumn(name = "shift_id", nullable = false)
     private Shift shift;
 
@@ -22,11 +22,16 @@ public class ShiftSwapRequest {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false)
     private LocalDate shiftDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ShiftType shiftType;
 
-    private Status status; // PENDING, APPROVED, REJECTED
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
 
     private LocalDateTime createdDate;
 
@@ -78,8 +83,8 @@ public class ShiftSwapRequest {
         this.createdDate = createdDate;
     }
 
-    public ShiftSwapRequestDTO getDto(){
-        ShiftSwapRequestDTO dto = new ShiftSwapRequestDTO();
+    public ShiftSwapResponseDTO getDto(){
+        ShiftSwapResponseDTO dto = new ShiftSwapResponseDTO();
 
         dto.setId(id);
         dto.setShiftId(shift.getDto().getId());

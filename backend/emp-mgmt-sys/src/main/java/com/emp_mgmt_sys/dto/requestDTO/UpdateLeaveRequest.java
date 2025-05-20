@@ -1,11 +1,18 @@
-package com.emp_mgmt_sys.dto;
+package com.emp_mgmt_sys.dto.requestDTO;
 
 import com.emp_mgmt_sys.enums.Status;
+import jakarta.validation.constraints.NotNull;
 
 public class UpdateLeaveRequest {
+
     private Long managerId;
+
+    @NotNull(message = "Leave Request ID is required")
     private Long leaveRequestId;
-    private Status status; // APPROVED or REJECTED
+
+    @NotNull(message = "Status is required")
+    private Status status;  // Should be APPROVED or REJECTED
+ // APPROVED or REJECTED
 
     public Long getManagerId() {
         return managerId;

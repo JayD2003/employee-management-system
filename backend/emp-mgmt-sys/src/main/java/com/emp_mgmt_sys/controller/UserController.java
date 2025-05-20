@@ -1,10 +1,11 @@
 package com.emp_mgmt_sys.controller;
 
-import com.emp_mgmt_sys.dto.AssignEmployeeRequest;
-import com.emp_mgmt_sys.dto.UserDTO;
-import com.emp_mgmt_sys.service.UserInfoService;
+import com.emp_mgmt_sys.dto.requestDTO.AssignEmployeeRequest;
+import com.emp_mgmt_sys.dto.requestDTO.UserRequestDTO;
+import com.emp_mgmt_sys.dto.responseDTO.UserResponseDTO;
+import com.emp_mgmt_sys.service.Impl.UserServiceImpl;
 import com.emp_mgmt_sys.utils.SecurityUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid; // ✅ Added for request validation
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -15,52 +16,58 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserInfoService userService;
+    private final UserServiceImpl userService;
 
-    // Admin can create new users
+    // ✅ Replaced @Autowired with constructor injection (better practice)
+    public UserController(UserServiceImpl userService) {
+        this.userService = userService;
+    }
+
+    // ✅ Added @Valid to validate DTO fields (e.g., not null, valid email)
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
-        userService.addUser(userDTO);
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserRequestDTO userRequestDTO) {
+        userService.addUser(userRequestDTO);
         return ResponseEntity.ok("User created successfully");
     }
 
-    // Admin can view all users
     @GetMapping("/allUsers")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<UserDTO> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @GetMapping("/allManagers")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDTO>> getAllManagers() {
+    public ResponseEntity<List<UserResponseDTO>> getAllManagers() {
         return ResponseEntity.ok(userService.getAllManagers());
     }
 
     @GetMapping("/allEmployees")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDTO>> getAllEmployees() {
+    public ResponseEntity<List<UserResponseDTO>> getAllEmployees() {
         return ResponseEntity.ok(userService.getAllEmployees());
     }
 
-    // Admin can view a specific user
-    @GetMapping("/getCurrentUser")
+    // ✅ Endpoint renamed from "/getCurrentUser" to "/current" (more RESTful)
+    @GetMapping("/current")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('EMPLOYEE')")
-    public UserDTO getUserById() {
+    public UserResponseDTO getCurrentUser() {
         Long userId = SecurityUtil.getCurrentUserId();
         return userService.getUserById(userId);
     }
 
+    // ✅ Improved error handling: returned error message if update fails
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
-        String response = userService.updateUser(id, userDTO);
+    public ResponseEntity<String> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDTO userRequestDTO) {
+        String response = userService.updateUser(id, userRequestDTO);
+        if (response.equals("User not found")) {
+            return ResponseEntity.badRequest().body("Update failed: User not found");
+        }
         return ResponseEntity.ok(response);
     }
 
-    // Admin can delete a user
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
@@ -70,22 +77,21 @@ public class UserController {
 
     @PostMapping("/assign-employees")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> assignEmployeesToManager(@RequestBody AssignEmployeeRequest assignEmployeeRequest) {
+    public ResponseEntity<?> assignEmployeesToManager(@Valid @RequestBody AssignEmployeeRequest assignEmployeeRequest) {
         userService.assignEmployeesToManager(assignEmployeeRequest.getManagerId(), assignEmployeeRequest.getEmployeeIds());
         return ResponseEntity.ok("Employees assigned to manager successfully");
     }
 
     @GetMapping("/assigned-employees/{managerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<UserDTO> getAssignedEmployees(@PathVariable Long managerId) {
+    public List<UserResponseDTO> getAssignedEmployees(@PathVariable Long managerId) {
         return userService.getAssignedEmployees(managerId);
     }
 
-    @GetMapping("/assigned-employees/")
+    @GetMapping("/assigned-employees")
     @PreAuthorize("hasRole('MANAGER')")
-    public List<UserDTO> getAssignedEmployeesForManager() {
+    public List<UserResponseDTO> getAssignedEmployeesForManager() {
         Long managerId = SecurityUtil.getCurrentUserId();
         return userService.getAssignedEmployees(managerId);
     }
 }
-

@@ -1,13 +1,10 @@
-package com.emp_mgmt_sys.dto;
+package com.emp_mgmt_sys.dto.responseDTO;
 
-import com.emp_mgmt_sys.entity.User;
 import com.emp_mgmt_sys.enums.ShiftType;
-import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-public class ShiftDTO {
+public class ShiftResponseDTO {
     private Long id;
 
     private Long userId;

@@ -1,6 +1,6 @@
 package com.emp_mgmt_sys.entity;
 
-import com.emp_mgmt_sys.dto.AttendanceDTO;
+import com.emp_mgmt_sys.dto.responseDTO.AttendanceResponseDTO;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -8,23 +8,33 @@ import java.time.LocalTime;
 import com.emp_mgmt_sys.enums.AttendanceStatus;
 
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "date"})
+        }
+)
 public class Attendance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
+    @Column(nullable = false)
     private LocalDate date;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AttendanceStatus status;
 
     private LocalTime clockInTime;
 
     private LocalTime clockOutTime;
 
     private Double workHours;
-
-    private AttendanceStatus status;
 
     // Getters and Setters
 
@@ -36,12 +46,12 @@ public class Attendance {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public LocalDate getDate() {
@@ -84,17 +94,17 @@ public class Attendance {
         this.status = status;
     }
 
-    public AttendanceDTO getDTO(){
-        AttendanceDTO attendanceDTO = new AttendanceDTO();
+    public AttendanceResponseDTO getDTO(){
+        AttendanceResponseDTO attendanceResponseDTO = new AttendanceResponseDTO();
 
-        attendanceDTO.setUserId(userId);
-        attendanceDTO.setDate(date);
-        attendanceDTO.setClockInTime(clockInTime);
-        attendanceDTO.setClockOutTime(clockOutTime);
-        attendanceDTO.setWorkHours(workHours);
-        attendanceDTO.setStatus(status);
+        attendanceResponseDTO.setUserId(user.getId());
+        attendanceResponseDTO.setDate(date);
+        attendanceResponseDTO.setClockInTime(clockInTime);
+        attendanceResponseDTO.setClockOutTime(clockOutTime);
+        attendanceResponseDTO.setWorkHours(workHours);
+        attendanceResponseDTO.setStatus(status);
 
-        return attendanceDTO;
+        return attendanceResponseDTO;
     }
 }
 

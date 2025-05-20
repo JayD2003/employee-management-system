@@ -1,4 +1,4 @@
-package com.emp_mgmt_sys.dto;
+package com.emp_mgmt_sys.dto.responseDTO;
 
 import com.emp_mgmt_sys.enums.LeaveType;
 import com.emp_mgmt_sys.enums.Status;
@@ -6,7 +6,7 @@ import com.emp_mgmt_sys.enums.Status;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class LeaveRequestDTO {
+public class LeaveRequestResponseDTO {
     private Long id;
 
     private Long userId; // assuming User entity represents employees

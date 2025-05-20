@@ -1,11 +1,12 @@
 package com.emp_mgmt_sys.controller;
 
-import com.emp_mgmt_sys.dto.AuthRequest;
-import com.emp_mgmt_sys.dto.AuthResponse;
-import com.emp_mgmt_sys.dto.UserDTO;
+import com.emp_mgmt_sys.dto.requestDTO.AuthRequest;
+import com.emp_mgmt_sys.dto.requestDTO.UserRequestDTO;
+import com.emp_mgmt_sys.dto.responseDTO.AuthResponse;
+import com.emp_mgmt_sys.dto.responseDTO.UserResponseDTO;
 import com.emp_mgmt_sys.entity.User;
 import com.emp_mgmt_sys.repository.UserRepository;
-import com.emp_mgmt_sys.service.UserInfoService;
+import com.emp_mgmt_sys.service.Impl.UserServiceImpl;
 import com.emp_mgmt_sys.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     @Autowired
-    private UserInfoService service;
+    private UserServiceImpl service;
 
     @Autowired
     private JwtUtil jwtService;
@@ -35,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/addNewUser")
-    public String addNewUser(@RequestBody UserDTO userInfo) {
+    public String addNewUser(@RequestBody UserRequestDTO userInfo) {
         return service.addUser(userInfo);
     }
 
